@@ -7,7 +7,7 @@ import plotly.express as px
 import seaborn as sns
 
 #DATA PREPARATION
-trade=pd.read_csv("C:/Users/itigh/Imports_Exports_Dataset.csv")
+trade=pd.read_csv(r"C:\Users\itigh\Streamlit\Imports_Exports_Dataset.csv")
 samtrade = trade.sample(n=3001, random_state=55015)
 samtrade.head()
 samtrade.info()
