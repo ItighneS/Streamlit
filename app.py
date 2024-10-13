@@ -47,7 +47,7 @@ plt.close()
 
 #2
 samtrade['Date'] = pd.to_datetime(samtrade['Date'], dayfirst=True, errors='coerce')
-samtrade.set_index('Date', inplace=True)
+samtrade.set_index('Date', inplace=True, drop=False)
 monthly_data = samtrade.groupby([pd.Grouper(freq='ME'), 'Import_Export'])['Value'].sum().unstack()
 monthly_data.reset_index(inplace=True)
 monthly_data['Year'] = pd.to_datetime(monthly_data['Date']).dt.year
@@ -209,10 +209,7 @@ else:
 
 ################################################################
 #7
-if 'Date' in samtrade.columns:
-    samtrade['Date'] = pd.to_datetime(samtrade['Date'], errors='coerce')
-else:
-    print("Column 'Date' not found in the DataFrame.")
+
 shipping_data = samtrade.groupby('Shipping_Method')['Value'].sum()
 colors = ['#FFB3BA', '#FFDFBA', '#FFFFBA']  
 plt.figure(figsize=(8, 8)) 
@@ -275,6 +272,38 @@ st.pyplot(plt.gcf())
 
 
 ############################################
+
+samtrade['Date'] = pd.to_datetime(samtrade['Date'], errors='coerce')
+
+monthly_dataset = samtrade.copy()  # Create a copy of the original dataset
+monthly_dataset['Value'].fillna(0, inplace=True)  # Replace NaN in Value with 0 for calculations
+
+# Create new columns for Year and Month in the monthly dataset
+monthly_dataset['Year'] = monthly_dataset['Date'].dt.year
+monthly_dataset['Month'] = monthly_dataset['Date'].dt.month
+
+# Group by Month and calculate average trade value across all years
+monthly_avg = monthly_dataset.groupby('Month')['Value'].mean().reset_index()
+
+# Create a new column to format month names
+monthly_avg['Month_Name'] = monthly_avg['Month'].apply(lambda x: pd.to_datetime(f'2023-{int(x)}-01').strftime('%B'))
+
+# Sort by Month number for correct ordering
+monthly_avg.sort_values(by='Month', inplace=True)
+
+# Plot the line chart
+plt.figure(figsize=(10, 6))
+plt.plot(monthly_avg['Month_Name'], monthly_avg['Value'], marker='o', color='blue')
+
+plt.title('Average Trade Values per Month (2019-2024)', fontsize=16)
+plt.xlabel('Month', fontsize=14)
+plt.ylabel('Average Trade Value ($)', fontsize=14)
+plt.xticks(rotation=45)
+plt.grid()
+plt.tight_layout()
+
+# Display the chart in Streamlit
+st.pyplot(plt.gcf())
 
 
 
